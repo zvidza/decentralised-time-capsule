@@ -1,6 +1,10 @@
 # Node modules
 /node_modules
 
+# Environment variables
+.env 
+.env.local
+
 # Compilation output
 /dist
 
@@ -15,6 +19,23 @@
 
 # Typechain output
 /types
+/typechain 
+/typechain-types
 
 # Hardhat coverage reports
 /coverage
+
+#MacOS file s 
+.DS_Store
+
+#IDE 
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*.swo
+
+# Logs
+*.log
