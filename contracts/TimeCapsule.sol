@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 /**
  * @title TimeCapsule
+ * @author Tadiwanashe Mandizvidza 
  * @dev Dapp used to store encrypted memmories on the blovckchain
  * @notice Contract governs metadata and access for time locked capsules 
 */
@@ -56,15 +57,20 @@ contract TimeCapsule {
     );
 
     // CORE FUNCTIONS
-
-    /// TODO: comments
+    /**
+     * @notice Createing a new time capsule
+     * @param _beneficiary beneficiary address
+     * @param _unlockTimestamp timestamp when capsule can be unlocked
+     * @param _arweaveTxId Arweave transaction ID
+     * @param _encryptedKey encrypted key for capsule
+     */
     function createCapsule(
         address _beneficiary,
         uint256 _unlockTimestamp,
         string memory _arweaveTxId,
         string memory _encryptedKey
     ) external returns (uint256) {
-        
+        //VALIDATIONS
         require(
             _unlockTimestamp > block.timestamp,
             "Unlock time should sometime be in the future"
@@ -87,6 +93,7 @@ contract TimeCapsule {
         uint256 newCapsuleId = _capsuleIdCounter;
         _capsuleIdCounter ++;
 
+        //New capsule struct 
         Capsule memory newCapsule = Capsule({
             creator: msg.sender,
              id: newCapsuleId,
@@ -111,6 +118,43 @@ contract TimeCapsule {
         );
 
         return newCapsuleId;
+    }
+
+    /**
+     * @notice Get capsule metadata
+     * @param _id ID of capsule to retrieve
+     * @return Capsule struct containing capsule metadata
+     */
+    function getCapsule(uint256 _id ) external view returns (Capsule memory) {
+        require(_id < _capsuleIdCounter, "Capsulse does not exist");
+        return _capsules[_id];
+    }
+
+    /**
+     * @notice Claim a time capsule
+     * @param _id ID of capsule to claim
+     */
+    function cancelCapsule(uint256 _id) external {
+        Capsule storage capsule = _capsules[_id];
+
+        require(
+            msg.sender == capsule.creator,
+            "Only the creator can cancel the capsule"
+        );
+
+        require(
+            block.timestamp < capsule.unlockTimestamp,
+            "Cannot cancel after unlock time"
+        );
+
+        require(
+            !capsule.isCancelled,
+            "Capsule is already cancelled"
+        );
+
+        capsule.isCancelled = true;
+
+        emit CapsuleCancelled(_id, msg.sender);
     }
 
 }
