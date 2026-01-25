@@ -45,6 +45,7 @@ contract TimeCapsule is ReentrancyGuard, Ownable, Pausable {
     error NotCapsuleBeneficiary(uint256 capsuleId, address caller);
     error CapsuleStillLocked(uint256 capsuleId, uint256 unlockTime);
     error CapsuleAlreadyCancelled(uint256 capsuleId);
+    error CannotCancelAfterUnlock(uint256 capsuleId, uint256 unlockTime);
 
     // EVENTS
     // Emitted when a new capsule is created
@@ -53,13 +54,6 @@ contract TimeCapsule is ReentrancyGuard, Ownable, Pausable {
         address indexed creator,
         address indexed beneficiary,
         uint256 unlockTimestamp
-    );
-
-    // Emitted when beneficiary claims capsule
-    event CapsuleClaimed(
-        uint256 indexed id,
-        address indexed beneficiary,
-        uint256 timestamp
     );
 
     // Emitted when creator cancels capsule
@@ -83,17 +77,12 @@ contract TimeCapsule is ReentrancyGuard, Ownable, Pausable {
         _;
     }
 
-    modifier onlyBeneficiary(uint256 _id) {
-        if (msg.sender != _capsules[_id].beneficiary) {
-            revert NotCapsuleBeneficiary(_id, msg.sender);
-        }
-        _;
-    }
-
     // CONSTRUCTOR
     constructor() Ownable(msg.sender) {
         // TODO: initilalizations
     }
+    
+
     // CORE FUNCTIONS
     /**
      * @notice Createing a new time capsule
@@ -174,10 +163,9 @@ contract TimeCapsule is ReentrancyGuard, Ownable, Pausable {
     function cancelCapsule(uint256 _id) external nonReentrant whenNotPaused() capsuleExists(_id) onlyCreator(_id) {
         Capsule storage capsule = _capsules[_id];
 
-        require(
-            block.timestamp < capsule.unlockTimestamp,
-            "Cannot cancel after unlock time"
-        );
+        if (block.timestamp >= capsule.unlockTimestamp) {
+            revert CannotCancelAfterUnlock(_id, capsule.unlockTimestamp);
+        }
 
         if (capsule.isCancelled) {
             revert CapsuleAlreadyCancelled(_id);
@@ -188,9 +176,8 @@ contract TimeCapsule is ReentrancyGuard, Ownable, Pausable {
         emit CapsuleCancelled(_id, msg.sender);
     }
 
-    //TODO: ADD admin and view functions 
-
     // ADMIN FUNCTIONS
+
     /**
      * @dev owner of contract is only one allowed to pause
     */
@@ -205,6 +192,8 @@ contract TimeCapsule is ReentrancyGuard, Ownable, Pausable {
         _unpause();
     }
 
+    // VIEW FUNCTIONS
+    
     /**
      * @notice Get all capsules created by a specific address
      * @param _creator creator address
@@ -221,5 +210,53 @@ contract TimeCapsule is ReentrancyGuard, Ownable, Pausable {
      */
     function getBeneficiaryCapsules(address _beneficiary) external view returns (uint256[] memory) {
         return _beneficiaryCapsules[_beneficiary];
+    }
+
+    /**
+     * @notice Get total number of capsules created
+     * @return uint256 total capsules
+     */
+    function getTotalCapsules() external view returns (uint256) {
+        return _capsuleIdCounter;
+    }
+
+    /**
+     * @notice Check if capsule is unlocked
+     * @param _id ID of capsule to check
+     * @return bool true if unlocked, false otherwise
+     */
+    function isCapsuleUnlocked(uint256 _id) external view capsuleExists(_id) returns (bool) {
+        return block.timestamp >= _capsules[_id].unlockTimestamp;
+    }
+
+    /**
+     * @notice Get time remaining until capsule unlocks
+     * @param _id ID of capsule to check
+     * @return uint256 time remaining, seconds
+     */
+    function getTimeRemaining(uint256 _id) external view capsuleExists(_id) returns (uint256) {
+        Capsule storage capsule = _capsules[_id];
+        if (block.timestamp >= capsule.unlockTimestamp) {
+            return 0;
+        } else {
+            return capsule.unlockTimestamp - block.timestamp;
+        }
+    }
+
+    /**
+     * @notice Get status of a capsule
+     * @param _id ID of capsule to check
+     * @return status string indicating capsule status
+     */
+    function getCapsuleStatus(uint256 _id) external view capsuleExists(_id) returns (string memory status) {
+        Capsule storage capsule = _capsules[_id];
+
+        if (capsule.isCancelled) {
+            return "Cancelled";
+        } else if (block.timestamp >= capsule.unlockTimestamp) {
+            return "Unlocked";
+        } else {
+            return "Locked";
+        }
     }
 }
