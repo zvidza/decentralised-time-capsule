@@ -2,6 +2,8 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
  * @title TimeCapsule
@@ -10,7 +12,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
  * @notice Contract governs metadata and access for time locked capsules 
  *@notice reentrancy guard ensures function is not called while being executed
 */
-contract TimeCapsule is ReentrancyGuard {
+contract TimeCapsule is ReentrancyGuard, Ownable, Pausable {
 
     // State variables
 
@@ -37,7 +39,14 @@ contract TimeCapsule is ReentrancyGuard {
     /// @dev Mapping beneficiary address to assigned capsule IDs
     mapping(address => uint256[]) private _beneficiaryCapsules;
 
-    // Events
+    //Gas optimization errors
+    error CapsuleDoesNotExist(uint256 capsuleId);
+    error NotCapsuleCreator(uint256 capsuleId, address caller);
+    error NotCapsuleBeneficiary(uint256 capsuleId, address caller);
+    error CapsuleStillLocked(uint256 capsuleId, uint256 unlockTime);
+    error CapsuleAlreadyCancelled(uint256 capsuleId);
+
+    // EVENTS
     // Emitted when a new capsule is created
     event CapsuleCreated(
         uint256 indexed id,
@@ -59,6 +68,32 @@ contract TimeCapsule is ReentrancyGuard {
         address indexed creator
     );
 
+    // MODIFIERS
+    modifier capsuleExists(uint256 _id) {
+        if (_id >= _capsuleIdCounter) {
+            revert CapsuleDoesNotExist(_id);
+        }
+        _;
+    }
+
+    modifier onlyCreator(uint256 _id) {
+        if (msg.sender != _capsules[_id].creator) {
+            revert NotCapsuleCreator(_id, msg.sender);
+        }
+        _;
+    }
+
+    modifier onlyBeneficiary(uint256 _id) {
+        if (msg.sender != _capsules[_id].beneficiary) {
+            revert NotCapsuleBeneficiary(_id, msg.sender);
+        }
+        _;
+    }
+
+    // CONSTRUCTOR
+    constructor() Ownable(msg.sender) {
+        // TODO: initilalizations
+    }
     // CORE FUNCTIONS
     /**
      * @notice Createing a new time capsule
@@ -72,7 +107,7 @@ contract TimeCapsule is ReentrancyGuard {
         uint256 _unlockTimestamp,
         string memory _arweaveTxId,
         string memory _encryptedKey
-    ) external nonReentrant returns (uint256) {
+    ) external nonReentrant whenNotPaused returns (uint256) {
         //VALIDATIONS
         require(
             _unlockTimestamp > block.timestamp,
@@ -128,8 +163,7 @@ contract TimeCapsule is ReentrancyGuard {
      * @param _id ID of capsule to retrieve
      * @return Capsule struct containing capsule metadata
      */
-    function getCapsule(uint256 _id ) external view returns (Capsule memory) {
-        require(_id < _capsuleIdCounter, "Capsulse does not exist");
+    function getCapsule(uint256 _id ) external view capsuleExists(_id) returns(Capsule memory) {
         return _capsules[_id];
     }
 
@@ -137,27 +171,22 @@ contract TimeCapsule is ReentrancyGuard {
      * @notice Claim a time capsule
      * @param _id ID of capsule to claim
      */
-    function cancelCapsule(uint256 _id) external nonReentrant {
+    function cancelCapsule(uint256 _id) external nonReentrant whenNotPaused() capsuleExists(_id) onlyCreator(_id) {
         Capsule storage capsule = _capsules[_id];
-
-        require(
-            msg.sender == capsule.creator,
-            "Only the creator can cancel the capsule"
-        );
 
         require(
             block.timestamp < capsule.unlockTimestamp,
             "Cannot cancel after unlock time"
         );
 
-        require(
-            !capsule.isCancelled,
-            "Capsule is already cancelled"
-        );
+        if (capsule.isCancelled) {
+            revert CapsuleAlreadyCancelled(_id);
+        }
 
         capsule.isCancelled = true;
 
         emit CapsuleCancelled(_id, msg.sender);
     }
 
+    //TODO: ADD admin and view functions 
 }
