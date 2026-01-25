@@ -189,4 +189,37 @@ contract TimeCapsule is ReentrancyGuard, Ownable, Pausable {
     }
 
     //TODO: ADD admin and view functions 
+
+    // ADMIN FUNCTIONS
+    /**
+     * @dev owner of contract is only one allowed to pause
+    */
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    /**
+     * @dev owner of contract is only one allowed to unpause
+    */
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
+    /**
+     * @notice Get all capsules created by a specific address
+     * @param _creator creator address
+     * @return uint256[] array of all capsule IDs
+     */
+    function getCreatedCapsules(address _creator) external view returns (uint256[] memory) {
+        return _createdCapsules[_creator];
+    }
+
+    /**
+     * @notice Get all capsules created by a specific address
+     * @param _beneficiary beneficiary address
+     * @return uint256[] array of all capsule IDs
+     */
+    function getBeneficiaryCapsules(address _beneficiary) external view returns (uint256[] memory) {
+        return _beneficiaryCapsules[_beneficiary];
+    }
 }
