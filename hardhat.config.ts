@@ -1,6 +1,10 @@
-import { HardhatUserConfig } from "hardhat/config";
+import { defineConfig } from "hardhat/config";
+import hardhatMocha from "@nomicfoundation/hardhat-mocha";
+import hardhatEthers from "@nomicfoundation/hardhat-ethers";
 
-const config: HardhatUserConfig = {
+export default defineConfig({
+  plugins: [hardhatMocha, hardhatEthers],
+
   solidity: {
     version: "0.8.20",
     settings: {
@@ -13,10 +17,10 @@ const config: HardhatUserConfig = {
 
   paths: {
     sources: "./contracts",
-    tests: "./test",
+    tests: {
+      mocha: "./test",
+    },
     cache: "./cache",
     artifacts: "./artifacts",
   },
-};
-
-export default config;
+});
