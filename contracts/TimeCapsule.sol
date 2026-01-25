@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: MIT 
 pragma solidity ^0.8.20;
 
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
 /**
  * @title TimeCapsule
  * @author Tadiwanashe Mandizvidza 
  * @dev Dapp used to store encrypted memmories on the blovckchain
  * @notice Contract governs metadata and access for time locked capsules 
+ *@notice reentrancy guard ensures function is not called while being executed
 */
-contract TimeCapsule {
+contract TimeCapsule is ReentrancyGuard {
 
     // State variables
 
@@ -69,7 +72,7 @@ contract TimeCapsule {
         uint256 _unlockTimestamp,
         string memory _arweaveTxId,
         string memory _encryptedKey
-    ) external returns (uint256) {
+    ) external nonReentrant returns (uint256) {
         //VALIDATIONS
         require(
             _unlockTimestamp > block.timestamp,
@@ -134,7 +137,7 @@ contract TimeCapsule {
      * @notice Claim a time capsule
      * @param _id ID of capsule to claim
      */
-    function cancelCapsule(uint256 _id) external {
+    function cancelCapsule(uint256 _id) external nonReentrant {
         Capsule storage capsule = _capsules[_id];
 
         require(
