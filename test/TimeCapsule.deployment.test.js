@@ -12,7 +12,7 @@ describe("TimeCapsule - Deployment", function () {
     const connection = await network.connect();
     ethers = connection.ethers;
 
-    // Get the first signer (deployer)
+    // Getting first signer
     [owner] = await ethers.getSigners();
 
     // Get contract factory and deploy
@@ -22,7 +22,7 @@ describe("TimeCapsule - Deployment", function () {
   });
 
   it("Should set the deployer as owner", async function () {
-    // The Ownable contract should set msg.sender as owner
+    //Ownable contract should set msg.sender as owner
     expect(await timeCapsule.owner()).to.equal(owner.address);
   });
 
