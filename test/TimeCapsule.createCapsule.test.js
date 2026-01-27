@@ -111,7 +111,7 @@ describe("TimeCapsule - createCapsule", function () {
         });
 
         it("Should track capsule in creator's list", async function () {
-            const unlockTime = (await getLatestTimestamp()) + 86400;
+            const unlockTime = (await getLatestTimestamp()) + 86400n;
 
             await timeCapsule
                 .connect(creator)

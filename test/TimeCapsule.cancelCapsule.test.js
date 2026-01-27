@@ -254,7 +254,7 @@ describe("TimeCapsule - cancelCapsule", function () {
     // PAUSABLE BEHAVIOUR
     describe("Pausable Behaviour", function () {
         beforeEach(async function () {
-            const unlockTime = (await getLatestTimestamp()) + 86400;
+            const unlockTime = (await getLatestTimestamp()) + 86400n;
 
             await timeCapsule
                 .connect(creator)
