@@ -1,7 +1,7 @@
 {
-  "name": "decentralized-time-capsule",
+  "name": "decentralised-time-capsule",
   "version": "1.0.0",
-  "description": "Web3 Decentralized Time Capsule dApp",
+  "description": "Web3 Decentralised Time Capsule dApp",
   "main": "index.js",
   "scripts": {
     "compile": "hardhat compile",
