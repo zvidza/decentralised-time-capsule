@@ -30,7 +30,7 @@ export default function Dashboard() {
                 <div className="max-w-6xl mx-auto flex justify-between items-center">
                     <div className="flex items-center gap-2">
                         <span className="text-2xl">🔐</span>
-                        <span className="font-semibold text-gray-900">Decentralised Tim Capsule App</span>
+                        <span className="font-semibold text-gray-900">Decentralised Time Capsule App</span>
                     </div>
                     <ConnectButton />
                 </div>
