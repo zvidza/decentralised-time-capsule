@@ -2,7 +2,7 @@ import "./globals.css";
 import { Web3Provider } from "@/context/Web3Provider";
 
 export const metadata = {
-  title: "Decentralssed Time Capsule",
+  title: "Decentralised Time Capsule",
   description: "Preserve your digital legacy forever on the Permaweb",
 };
 

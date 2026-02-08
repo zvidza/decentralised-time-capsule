@@ -93,7 +93,7 @@ export default function CreateCapsule() {
           {/* Step 1: Upload File */}
           {currentStep === 1 && (
             <div>
-              <h2 className="text-xl font-semibold mb-4">Upload Your Artifact</h2>
+              <h2 className="text-black font-semibold mb-4">Upload Your Artifact</h2>
               <p className="text-gray-600 mb-6">Select the file you want to preserve in your time capsule.</p>
 
               <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
