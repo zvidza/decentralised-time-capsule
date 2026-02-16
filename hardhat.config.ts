@@ -1,10 +1,11 @@
 import { defineConfig } from "hardhat/config";
-import hardhatMocha from "@nomicfoundation/hardhat-mocha";
 import hardhatEthers from "@nomicfoundation/hardhat-ethers";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 export default defineConfig({
-  plugins: [hardhatMocha, hardhatEthers],
-
+  plugins: [hardhatEthers],
   solidity: {
     version: "0.8.20",
     settings: {
@@ -17,10 +18,16 @@ export default defineConfig({
 
   paths: {
     sources: "./contracts",
-    tests: {
-      mocha: "./test",
-    },
+    tests: "./test",
     cache: "./cache",
     artifacts: "./artifacts",
+  },
+
+  networks: {
+    arbitrumSepolia: {
+      type: "http",
+      url: `https://arb-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+    },
   },
 });
