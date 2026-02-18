@@ -4,10 +4,12 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useCreateCapsule } from '@/hooks/useTimeCapsule';
 
 export default function CreateCapsule() {
   const { isConnected } = useAccount();
   const router = useRouter();
+  
   // Wizard state
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -17,12 +19,23 @@ export default function CreateCapsule() {
   const [beneficiary, setBeneficiary] = useState('');
   const [unlockDate, setUnlockDate] = useState('');
 
+  // Contract hook
+  const { createCapsule, isPending, isConfirming, isSuccess, error } = useCreateCapsule();
+
   // Redirect if not connected
   useEffect(() => {
     if (!isConnected) {
       router.push('/');
     }
   }, [isConnected, router]);
+
+  // Redirect to dashboard on success
+  useEffect(() => {
+    if (isSuccess) {
+      alert('Capsule created successfully!');
+      router.push('/dashboard');
+    }
+  }, [isSuccess, router]);
 
   if (!isConnected) return null;
 
@@ -37,10 +50,42 @@ export default function CreateCapsule() {
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 3));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
-  // Handle form submission (TODO: add blockchain logic later)
+  // Handle form submission
   const handleSubmit = async () => {
-    alert('Capsule creation will be implemented in Task 4.4!');
-    // TODO: Encrypt file, upload to Arweave, call smart contract
+    try {
+      // Validate inputs
+      if (!beneficiary || !unlockDate) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      // Validate beneficiary address
+      if (!beneficiary.startsWith('0x') || beneficiary.length !== 42) {
+        alert('Please enter a valid wallet address (0x...)');
+        return;
+      }
+
+      // Convert date to Unix timestamp (seconds)
+      const unlockTimestamp = BigInt(Math.floor(new Date(unlockDate).getTime() / 1000));
+
+      // Check if unlock date is in the future
+      if (unlockTimestamp <= BigInt(Math.floor(Date.now() / 1000))) {
+        alert('Unlock date must be in the future');
+        return;
+      }
+
+      // For now, use placeholder values for Arweave ID and encrypted key
+      // We'll replace these with real values in Tasks 4.5 and 4.6
+      const arweaveTxId = 'placeholder_' + Date.now();
+      const encryptedKey = 'placeholder_key_' + Date.now();
+
+      // Call the smart contract
+      await createCapsule(beneficiary, unlockTimestamp, arweaveTxId, encryptedKey);
+
+    } catch (err) {
+      console.error('Error creating capsule:', err);
+      alert('Error creating capsule. Check console for details.');
+    }
   };
 
   return (
@@ -86,6 +131,13 @@ export default function CreateCapsule() {
           <span className={currentStep >= 2 ? 'text-purple-600' : 'text-gray-400'}>2. Conditions</span>
           <span className={currentStep >= 3 ? 'text-purple-600' : 'text-gray-400'}>3. Seal</span>
         </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
+            Error: {error.message}
+          </div>
+        )}
 
         {/* Step Content */}
         <div className="bg-white rounded-2xl border border-gray-200 p-8">
@@ -139,8 +191,8 @@ export default function CreateCapsule() {
                     type="text"
                     value={beneficiary}
                     onChange={(e) => setBeneficiary(e.target.value)}
-                    placeholder="0x... or ENS name"
-                    className="w-full px-4 py-2 border border-black-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="0x..."
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />
                 </div>
 
@@ -174,13 +226,27 @@ export default function CreateCapsule() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-black-500">Beneficiary:</span>
-                  <span className="font-medium text-sm">{beneficiary || 'Not set'}</span>
+                  <span className="font-medium text-sm">
+                    {beneficiary ? `${beneficiary.slice(0, 6)}...${beneficiary.slice(-4)}` : 'Not set'}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-black-500">Unlock Date:</span>
-                  <span className="font-medium">{unlockDate || 'Not set'}</span>
+                  <span className="font-medium">
+                    {unlockDate ? new Date(unlockDate).toLocaleString() : 'Not set'}
+                  </span>
                 </div>
               </div>
+
+              {/* Transaction Status */}
+              {(isPending || isConfirming) && (
+                <div className="mt-6 text-center">
+                  <div className="w-8 h-8 border-2 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                  <p className="text-gray-600">
+                    {isPending ? 'Waiting for wallet approval...' : 'Confirming transaction...'}
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -189,9 +255,9 @@ export default function CreateCapsule() {
         <div className="flex justify-between mt-6">
           <button
             onClick={prevStep}
-            disabled={currentStep === 1}
+            disabled={currentStep === 1 || isPending || isConfirming}
             className={`px-6 py-2 rounded-full font-medium ${
-              currentStep === 1
+              currentStep === 1 || isPending || isConfirming
                 ? 'text-gray-400 cursor-not-allowed'
                 : 'text-purple-600 hover:bg-purple-50'
             }`}
@@ -209,9 +275,14 @@ export default function CreateCapsule() {
           ) : (
             <button
               onClick={handleSubmit}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-6 py-2 rounded-full"
+              disabled={isPending || isConfirming}
+              className={`font-medium px-6 py-2 rounded-full ${
+                isPending || isConfirming
+                  ? 'bg-gray-400 cursor-not-allowed text-white'
+                  : 'bg-purple-600 hover:bg-purple-700 text-white'
+              }`}
             >
-              Seal Capsule 🔐
+              {isPending || isConfirming ? 'Processing...' : 'Seal Capsule 🔐'}
             </button>
           )}
         </div>
