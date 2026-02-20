@@ -5,6 +5,8 @@ import { useAccount } from 'wagmi';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useCreateCapsule } from '@/hooks/useTimeCapsule';
+import { encryptFile } from '@/lib/encryption';
+import { uploadToArweave } from '@/lib/arweave';
 
 export default function CreateCapsule() {
   const { isConnected } = useAccount();
@@ -39,54 +41,67 @@ export default function CreateCapsule() {
 
   if (!isConnected) return null;
 
-  // Handle file selection
+// Handle file selection
   const handleFileChange = (e) => {
     if (e.target.files[0]) {
       setFile(e.target.files[0]);
     }
   };
 
-  // Navigation between steps
+// Navigation between steps
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 3));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
-  // Handle form submission
-  const handleSubmit = async () => {
-    try {
-      // Validate inputs
-      if (!beneficiary || !unlockDate) {
-        alert('Please fill in all fields');
-        return;
-      }
-
-      // Validate beneficiary address
-      if (!beneficiary.startsWith('0x') || beneficiary.length !== 42) {
-        alert('Please enter a valid wallet address (0x...)');
-        return;
-      }
-
-      // Convert date to Unix timestamp (seconds)
-      const unlockTimestamp = BigInt(Math.floor(new Date(unlockDate).getTime() / 1000));
-
-      // Check if unlock date is in the future
-      if (unlockTimestamp <= BigInt(Math.floor(Date.now() / 1000))) {
-        alert('Unlock date must be in the future');
-        return;
-      }
-
-      // For now, use placeholder values for Arweave ID and encrypted key
-      // We'll replace these with real values in Tasks 4.5 and 4.6
-      const arweaveTxId = 'placeholder_' + Date.now();
-      const encryptedKey = 'placeholder_key_' + Date.now();
-
-      // Call the smart contract
-      await createCapsule(beneficiary, unlockTimestamp, arweaveTxId, encryptedKey);
-
-    } catch (err) {
-      console.error('Error creating capsule:', err);
-      alert('Error creating capsule. Check console for details.');
+// Handle form submission
+const handleSubmit = async () => {
+  try {
+    // Validate inputs
+    if (!file) {
+      alert('Please select a file');
+      return;
     }
-  };
+    
+    if (!beneficiary || !unlockDate) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    // Validate beneficiary address
+    if (!beneficiary.startsWith('0x') || beneficiary.length !== 42) {
+      alert('Please enter a valid wallet address (0x...)');
+      return;
+    }
+
+    // Convert date to Unix timestamp (seconds)
+    const unlockTimestamp = BigInt(Math.floor(new Date(unlockDate).getTime() / 1000));
+
+    // Check if unlock date is in the future
+    if (unlockTimestamp <= BigInt(Math.floor(Date.now() / 1000))) {
+      alert('Unlock date must be in the future');
+      return;
+    }
+
+    // Step 1: Encrypt the file
+    console.log('Encrypting file...');
+    const { encryptedData, encryptionKey, originalName, originalType } = await encryptFile(file);
+    
+    // Step 2: Upload to Arweave
+    console.log('Uploading to Arweave...');
+    const arweaveTxId = await uploadToArweave(encryptedData, {
+      name: originalName,
+      type: originalType,
+      title: title,
+    });
+    
+    // Step 3: Call the smart contract
+    console.log('Creating capsule on blockchain...');
+    await createCapsule(beneficiary, unlockTimestamp, arweaveTxId, encryptionKey);
+
+  } catch (err) {
+    console.error('Error creating capsule:', err);
+    alert('Error creating capsule. Check console for details.');
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50">
