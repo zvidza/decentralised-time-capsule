@@ -8,6 +8,7 @@ import { useCreatedCapsules, useBeneficiaryCapsules, useCapsule } from '@/hooks/
 
 // Component to display a single capsule card
 function CapsuleCard({ capsuleId, isCreator }) {
+    const router = useRouter();
     const { data: capsule, isLoading } = useCapsule(capsuleId);
 
     if (isLoading) {
@@ -40,8 +41,16 @@ function CapsuleCard({ capsuleId, isCreator }) {
     // Shorten addresses for display
     const shortAddress = (addr) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
+    // Handle click to view capsule
+    const handleClick = () => {
+        router.push(`/capsule/${capsuleId.toString()}`);
+    };
+
     return (
-        <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+        <div
+            onClick={handleClick}
+            className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow cursor-pointer"
+        >
             <div className="flex justify-between items-start mb-4">
                 <div className="text-2xl">📦</div>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColor}`}>
@@ -58,9 +67,14 @@ function CapsuleCard({ capsuleId, isCreator }) {
                     <>From: {shortAddress(capsule.creator)}</>
                 )}
             </p>
+
             <p className="text-sm text-gray-600">
                 {isUnlocked ? 'Unlocked on: ' : 'Unlocks on: '}
                 {unlockDate.toLocaleDateString()} {unlockDate.toLocaleTimeString()}
+            </p>
+
+            <p className="text-purple-600 text-sm mt-3 font-medium">
+                Click to view →
             </p>
         </div>
     );

@@ -60,15 +60,16 @@ const handleSubmit = async () => {
       alert('Please select a file');
       return;
     }
-    
-    if (!beneficiary || !unlockDate) {
-      alert('Please fill in all fields');
+
+    // Check file size (limit to 2MB for demo)
+    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+    if (file.size > maxSize) {
+      alert('File too large! Please select a file under 2MB.\n\n(This limit exists because the demo uses localStorage. Production would use Arweave with no size limit.)');
       return;
     }
-
-    // Validate beneficiary address
-    if (!beneficiary.startsWith('0x') || beneficiary.length !== 42) {
-      alert('Please enter a valid wallet address (0x...)');
+    // validate beneficiary address 
+    if (!beneficiary || !unlockDate) {
+      alert('Please fill in all fields');
       return;
     }
 
