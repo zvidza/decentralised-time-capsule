@@ -7,6 +7,9 @@ import { useEffect, useState } from 'react';
 import { useCapsule } from '@/hooks/useTimeCapsule';
 import { downloadFromArweave } from '@/lib/arweave';
 import { decryptFile } from '@/lib/encryption';
+import { markCapsuleAsOpened } from '@/lib/openedCapsules';
+import Countdown from '@/components/Countdown';
+
 
 export default function CapsuleViewer() {
     const { address, isConnected } = useAccount();
@@ -111,6 +114,9 @@ export default function CapsuleViewer() {
             setDecryptedContent(url);
             setContentType(decryptedFile.type);
             setFileName(decryptedFile.name);
+
+            // marking capsule as opened
+            markCapsuleAsOpened(address, capsuleId); 
 
         } catch (err) {
             console.error('Error decrypting:', err);
