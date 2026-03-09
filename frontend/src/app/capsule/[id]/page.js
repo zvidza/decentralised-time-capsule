@@ -10,7 +10,6 @@ import { decryptFile } from '@/lib/encryption';
 import { markCapsuleAsOpened } from '@/lib/openedCapsules';
 import Countdown from '@/components/Countdown';
 
-
 export default function CapsuleViewer() {
     const { address, isConnected } = useAccount();
     const router = useRouter();
@@ -253,12 +252,13 @@ export default function CapsuleViewer() {
                                     ? 'THE TIME HAS COME'
                                     : 'THIS CAPSULE IS SEALED'}
                         </h1>
-
+                        
                         {!isCancelled && !isUnlocked && (
-                            <p className="text-gray-500 mt-2">
-                                Unlocks in: <span className="font-semibold">{getTimeRemaining()}</span>
-                            </p>
-                        )}
+                            <div className="mt-6">
+                                <p className="text-gray-500 mb-4">Unlocks in:</p>
+                                <Countdown unlockDate={unlockDate} />
+                        </div>
+                    )}
                     </div>
                 )}
 
