@@ -123,7 +123,7 @@ contract TimeCapsule is ReentrancyGuard, Ownable, Pausable {
         //New capsule struct 
         Capsule memory newCapsule = Capsule({
             creator: msg.sender,
-             id: newCapsuleId,
+            id: newCapsuleId,
             beneficiary: _beneficiary,
             unlockTimestamp: _unlockTimestamp,
             arweaveTxId: _arweaveTxId,

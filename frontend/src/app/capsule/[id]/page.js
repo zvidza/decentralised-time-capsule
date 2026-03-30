@@ -4,25 +4,25 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useCapsule } from '@/hooks/useTimeCapsule';
+import { useCapsule, useCancelCapsule } from '@/hooks/useTimeCapsule';
 import { downloadFromArweave } from '@/lib/arweave';
 import { decryptFile } from '@/lib/encryption';
 import { markCapsuleAsOpened } from '@/lib/openedCapsules';
 import Countdown from '@/components/Countdown';
 
 export default function CapsuleViewer() {
+    //hooks and state
     const { address, isConnected } = useAccount();
     const router = useRouter();
     const params = useParams();
     const capsuleId = params.id;
-
     const { data: capsule, isLoading } = useCapsule(BigInt(capsuleId));
-
     const [isDecrypting, setIsDecrypting] = useState(false);
     const [error, setError] = useState(null);
     const [decryptedContent, setDecryptedContent] = useState(null);
     const [contentType, setContentType] = useState(null);
     const [fileName, setFileName] = useState(null);
+    const { cancelCapsule, isPending: isCancelling, isSuccess: cancelSuccess, error: cancelError } = useCancelCapsule();
 
     // Redirect if not connected
     useEffect(() => {
@@ -30,6 +30,13 @@ export default function CapsuleViewer() {
             router.push('/');
         }
     }, [isConnected, router]);
+
+    // Refresh page after successful cancellation
+    useEffect(() => {
+        if (cancelSuccess) {
+            window.location.reload();
+        }
+    }, [cancelSuccess]);
 
     if (!isConnected) return null;
 
@@ -135,6 +142,19 @@ export default function CapsuleViewer() {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+    };
+
+    // Handle cancel capsule
+    const handleCancel = async () => {
+        if (!confirm('Are you sure you want to cancel this capsule? This cannot be undone.')) {
+            return;
+        }
+        
+        try {
+            await cancelCapsule(BigInt(capsuleId));
+        } catch (err) {
+            console.error('Error cancelling capsule:', err);
+        }
     };
 
     // Render content based on file type
@@ -356,10 +376,37 @@ export default function CapsuleViewer() {
                     </div>
                 )}
 
-                {/* Creator message */}
+                {/* Creator section - message and cancel button */}
                 {isCreator && !isBeneficiary && (
-                    <div className="text-center text-gray-500">
-                        You created this capsule. Only the beneficiary can open it.
+                    <div className="space-y-4">
+                        <div className="text-center text-gray-500">
+                            You created this capsule. Only the beneficiary can open it.
+                        </div>
+
+                        {/* Cancel button - only show if not unlocked and not cancelled */}
+                        {!isUnlocked && !isCancelled && (
+                            <button
+                                onClick={handleCancel}
+                                disabled={isCancelling}
+                                className="w-full py-3 rounded-full font-medium border-2 border-red-500 text-red-500 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isCancelling ? (
+                                    <span className="flex items-center justify-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                                        Cancelling...
+                                    </span>
+                                ) : (
+                                    'Cancel Capsule ❌'
+                                )}
+                            </button>
+                        )}
+
+                        {/* Cancel error */}
+                        {cancelError && (
+                            <p className="text-red-500 text-sm text-center">
+                                Failed to cancel capsule. Please try again.
+                                </p>
+                        )}
                     </div>
                 )}
             </main>
