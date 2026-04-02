@@ -4,7 +4,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useCapsule, useCancelCapsule } from '@/hooks/useTimeCapsule';
+import { useCapsule, useCancelCapsule, useCapsuleStatus } from '@/hooks/useTimeCapsule';
 import { downloadFromArweave } from '@/lib/arweave';
 import { decryptFile } from '@/lib/encryption';
 import { markCapsuleAsOpened } from '@/lib/openedCapsules';
@@ -17,6 +17,7 @@ export default function CapsuleViewer() {
     const params = useParams();
     const capsuleId = params.id;
     const { data: capsule, isLoading } = useCapsule(BigInt(capsuleId));
+    const { data: capsuleStatus } = useCapsuleStatus(BigInt(capsuleId));
     const [isDecrypting, setIsDecrypting] = useState(false);
     const [error, setError] = useState(null);
     const [decryptedContent, setDecryptedContent] = useState(null);
@@ -67,8 +68,8 @@ export default function CapsuleViewer() {
     // Calculate status
     const unlockDate = new Date(Number(capsule.unlockTimestamp) * 1000);
     const now = new Date();
-    const isUnlocked = now >= unlockDate;
-    const isCancelled = capsule.isCancelled;
+    const isUnlocked = capsuleStatus === 'Unlocked';
+    const isCancelled = capsuleStatus === 'Cancelled';
     const isBeneficiary = address?.toLowerCase() === capsule.beneficiary.toLowerCase();
     const isCreator = address?.toLowerCase() === capsule.creator.toLowerCase();
 
@@ -298,23 +299,23 @@ export default function CapsuleViewer() {
                     <div className="space-y-3">
                         <div className="flex justify-between">
                             <span className="text-gray-500">Capsule ID:</span>
-                            <span className="font-medium">#{capsuleId}</span>
+                            <span className="font-medium text-gray-900">#{capsuleId}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-gray-500">Creator:</span>
-                            <span className="font-medium">{shortAddress(capsule.creator)}</span>
+                            <span className="font-medium text-gray-900">{shortAddress(capsule.creator)}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-gray-500">Beneficiary:</span>
-                            <span className="font-medium">{shortAddress(capsule.beneficiary)}</span>
+                            <span className="font-medium text-gray-900">{shortAddress(capsule.beneficiary)}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-gray-500">Unlock Date:</span>
-                            <span className="font-medium">{unlockDate.toLocaleString()}</span>
+                            <span className="font-medium text-gray-900">{unlockDate.toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-gray-500">Status:</span>
-                            <span className={`font-medium ${
+                            <span className={`font-medium text-gray-900 ${
                                 isCancelled
                                     ? 'text-red-600'
                                     : isUnlocked

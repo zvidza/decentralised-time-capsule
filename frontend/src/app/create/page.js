@@ -156,15 +156,15 @@ const handleSubmit = async () => {
         )}
 
         {/* Step Content */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-8">
+        <div className="bg-white rounded-2xl border border-gray-00 p-8">
 
           {/* Step 1: Upload File */}
           {currentStep === 1 && (
             <div>
               <h2 className="text-black font-semibold mb-4">Upload Your Artifact</h2>
-              <p className="text-gray-600 mb-6">Select the file you want to preserve in your time capsule.</p>
+              <p className="text-green-600 mb-6">Select the file you want to preserve in your time capsule.</p>
 
-              <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
+              <div className="border-2 border-dashed border-gray-500 rounded-xl p-8 text-center">
                 <input
                   type="file"
                   onChange={handleFileChange}
@@ -174,9 +174,9 @@ const handleSubmit = async () => {
                 <label htmlFor="file-upload" className="cursor-pointer">
                   <div className="text-4xl mb-4">📁</div>
                   {file ? (
-                    <p className="text-purple-600 font-medium">{file.name}</p>
+                    <p className="text-purple-900 font-medium">{file.name}</p>
                   ) : (
-                    <p className="text-gray-500">Click to select a file</p>
+                    <p className="text-gray-900">Click to select a file</p>
                   )}
                 </label>
               </div>
@@ -186,39 +186,39 @@ const handleSubmit = async () => {
           {/* Step 2: Set Conditions */}
           {currentStep === 2 && (
             <div>
-              <h2 className="text-xl font-semibold mb-4">Set Conditions</h2>
-              <p className="text-red-600 mb-6">Define who can open this capsule and when.</p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Set Conditions</h2>
+              <p className="text-green-600 mb-6">Define who can open this capsule and when.</p>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <label className="block text-sm font-medium text-gray-900 mb-1">Title</label>
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Enter a public title"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder:text-gray-700"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Beneficiary Wallet Address</label>
+                  <label className="block text-sm font-medium text-gray-900 mb-1">Beneficiary Wallet Address</label>
                   <input
                     type="text"
                     value={beneficiary}
                     onChange={(e) => setBeneficiary(e.target.value)}
                     placeholder="0x..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder:text-gray-700"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Unlock Date</label>
+                  <label className="block text-sm font-medium text-gray-900 mb-1">Unlock Date</label>
                   <input
                     type="datetime-local"
                     value={unlockDate}
                     onChange={(e) => setUnlockDate(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder:text-gray-900"
                   />
                 </div>
               </div>
@@ -228,27 +228,27 @@ const handleSubmit = async () => {
           {/* Step 3: Confirm and Seal */}
           {currentStep === 3 && (
             <div>
-              <h2 className="text-xl font-semibold mb-4">Seal Your Capsule</h2>
-              <p className="text-black-600 mb-6">Review your capsule details before sealing.</p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Seal Your Capsule</h2>
+              <p className=" text-green-600 mb-6">Review your capsule details before sealing.</p>
 
               <div className="bg-gray-50 rounded-xl p-6 space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-black-500">File:</span>
-                  <span className="font-medium">{file?.name || 'No file selected'}</span>
+                  <span className="text-gray-900">File:</span>
+                  <span className="font-medium text-gray-900">{file?.name || 'No file selected'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-black-500">Title:</span>
-                  <span className="font-medium">{title || 'Untitled'}</span>
+                  <span className="text-gray-900">Title:</span>
+                  <span className="font-medium text-gray-900">{title || 'Untitled'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-black-500">Beneficiary:</span>
-                  <span className="font-medium text-sm">
+                  <span className="text-gray-900">Beneficiary:</span>
+                  <span className="font-medium  text-gray-900 text-sm">
                     {beneficiary ? `${beneficiary.slice(0, 6)}...${beneficiary.slice(-4)}` : 'Not set'}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-black-500">Unlock Date:</span>
-                  <span className="font-medium">
+                  <span className="text-gray-900">Unlock Date:</span>
+                  <span className="font-medium text-gray-900">
                     {unlockDate ? new Date(unlockDate).toLocaleString() : 'Not set'}
                   </span>
                 </div>
@@ -258,7 +258,7 @@ const handleSubmit = async () => {
               {(isPending || isConfirming) && (
                 <div className="mt-6 text-center">
                   <div className="w-8 h-8 border-2 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                  <p className="text-gray-600">
+                  <p className="text-gray-900">
                     {isPending ? 'Waiting for wallet approval...' : 'Confirming transaction...'}
                   </p>
                 </div>
