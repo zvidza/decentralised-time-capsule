@@ -49,10 +49,7 @@ export async function encryptFile(file) {
 
     // Encrypt the file
     const encryptedBuffer = await window.crypto.subtle.encrypt(
-        {
-            name: 'AES-GCM',
-            iv: iv,
-        },
+        { name: 'AES-GCM',iv: iv,},
         key,
         fileBuffer
     );

@@ -1,18 +1,20 @@
 'use client';
 
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount } from 'wagmi';
+import { useAccount, useWalletClient } from 'wagmi';
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useCapsule, useCancelCapsule, useCapsuleStatus } from '@/hooks/useTimeCapsule';
-import { downloadFromArweave } from '@/lib/arweave';
+import { downloadFromArweave, getMetadataFromArweave } from '@/lib/arweave';
 import { decryptFile } from '@/lib/encryption';
+import { getLitClient, getSessionSigs, decryptKeyWithLit } from '@/lib/lit';
 import { markCapsuleAsOpened } from '@/lib/openedCapsules';
 import Countdown from '@/components/Countdown';
 
 export default function CapsuleViewer() {
     //hooks and state
     const { address, isConnected } = useAccount();
+    const { data: walletClient } = useWalletClient();
     const router = useRouter();
     const params = useParams();
     const capsuleId = params.id;
@@ -23,6 +25,15 @@ export default function CapsuleViewer() {
     const [decryptedContent, setDecryptedContent] = useState(null);
     const [contentType, setContentType] = useState(null);
     const [fileName, setFileName] = useState(null);
+    const [capsuleTitle, setCapsuleTitle] = useState(null);
+
+    useEffect(() => {
+        if (capsule?.arweaveTxId) {
+            getMetadataFromArweave(capsule.arweaveTxId)
+                .then((meta) => { if (meta?.title) setCapsuleTitle(meta.title); })
+                .catch(() => {});
+        }
+    }, [capsule?.arweaveTxId]);
     const { cancelCapsule, isPending: isCancelling, isSuccess: cancelSuccess, error: cancelError } = useCancelCapsule();
 
     // Redirect if not connected
@@ -31,6 +42,11 @@ export default function CapsuleViewer() {
             router.push('/');
         }
     }, [isConnected, router]);
+
+    // Pre-warm the Lit client connection on mount so it's ready when the user opens the capsule
+    useEffect(() => {
+        getLitClient().catch(() => {});
+    }, []);
 
     // Refresh page after successful cancellation
     useEffect(() => {
@@ -103,15 +119,40 @@ export default function CapsuleViewer() {
         setError(null);
 
         try {
-            // Step 1: Download from Arweave
+            // Step 1: Resolve the AES key —either via Lit or raw base64
+            let aesKeyString;
+            let litData = null;
+            try {
+                litData = JSON.parse(capsule.encryptedKey);
+            } catch {
+                // Not JSON — must be a legacy raw base64 key
+            }
+
+            if (litData?.ciphertext) {
+                // Lit-encrypted capsule: ask the Lit network to verify conditions and release the key
+                console.log('Connecting to Lit Protocol...');
+                const litClient = await getLitClient();
+                const sessionSigs = await getSessionSigs(litClient, walletClient, address);
+                aesKeyString = await decryptKeyWithLit({
+                    ciphertext: litData.ciphertext,
+                    dataToEncryptHash: litData.dataToEncryptHash,
+                    accessControlConditions: litData.accessControlConditions,
+                    sessionSigs,
+                });
+            } else {
+                // Legacy capsule: encryptedKey is a raw base64 AES key
+                aesKeyString = capsule.encryptedKey;
+            }
+
+            // Step 2: Download from Arweave
             console.log('Downloading from Arweave...');
             const { encryptedData, metadata } = await downloadFromArweave(capsule.arweaveTxId);
 
-            // Step 2: Decrypt the file
+            // Step 3: Decrypt the file with the resolved AES key
             console.log('Decrypting file...');
             const decryptedFile = await decryptFile(
                 encryptedData,
-                capsule.encryptedKey,
+                aesKeyString,
                 metadata.name,
                 metadata.type
             );
@@ -245,6 +286,9 @@ export default function CapsuleViewer() {
                     >
                         ← Back to Dashboard
                     </button>
+                    {capsuleTitle && (
+                        <span className="font-semibold text-gray-900 truncate max-w-xs">{capsuleTitle}</span>
+                    )}
                     <ConnectButton />
                 </div>
             </nav>
@@ -297,6 +341,12 @@ export default function CapsuleViewer() {
                     <h2 className="font-semibold text-gray-900 mb-4">Capsule Details</h2>
 
                     <div className="space-y-3">
+                        {capsuleTitle && (
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">Title:</span>
+                                <span className="font-medium text-gray-900">{capsuleTitle}</span>
+                            </div>
+                        )}
                         <div className="flex justify-between">
                             <span className="text-gray-500">Capsule ID:</span>
                             <span className="font-medium text-gray-900">#{capsuleId}</span>

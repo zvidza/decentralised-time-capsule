@@ -6,11 +6,21 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useCreatedCapsules, useBeneficiaryCapsules, useCapsule } from '@/hooks/useTimeCapsule';
 import { isCapsuleOpened } from '@/lib/openedCapsules';
+import { getMetadataFromArweave } from '@/lib/arweave';
 
 // Component to display a single capsule card
 function CapsuleCard({ capsuleId, isCreator, address }) {
     const router = useRouter();
     const { data: capsule, isLoading } = useCapsule(capsuleId);
+    const [capsuleTitle, setCapsuleTitle] = useState(null);
+
+    useEffect(() => {
+        if (capsule?.arweaveTxId) {
+            getMetadataFromArweave(capsule.arweaveTxId)
+                .then((meta) => { if (meta?.title) setCapsuleTitle(meta.title); })
+                .catch(() => {});
+        }
+    }, [capsule?.arweaveTxId]);
 
     if (isLoading) {
         return (
@@ -68,7 +78,12 @@ function CapsuleCard({ capsuleId, isCreator, address }) {
                 </span>
             </div>
 
-            <h3 className="font-semibold text-gray-900 mb-1">Capsule #{capsuleId.toString()}</h3>
+            <h3 className="font-semibold text-gray-900 mb-1">
+                {capsuleTitle || `Capsule #${capsuleId.toString()}`}
+            </h3>
+            {capsuleTitle && (
+                <p className="text-xs text-gray-400 mb-1">#{capsuleId.toString()}</p>
+            )}
 
             <p className="text-sm text-gray-500 mb-3">
                 {isCreator ? (

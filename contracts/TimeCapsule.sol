@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/Pausable.sol";
 /**
  * @title TimeCapsule
  * @author Tadiwanashe Mandizvidza 
- * @dev Dapp used to store encrypted memmories on the blovckchain
+ * @dev dApp used to store encrypted memories on the blockchain
  * @notice Contract governs metadata and access for time locked capsules 
  *@notice reentrancy guard ensures function is not called while being executed
 */
@@ -79,7 +79,6 @@ contract TimeCapsule is ReentrancyGuard, Ownable, Pausable {
 
     // CONSTRUCTOR
     constructor() Ownable(msg.sender) {
-        // TODO: initilalizations
     }
     
 

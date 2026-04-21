@@ -4,12 +4,15 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useWalletClient } from 'wagmi';
 import { useCreateCapsule } from '@/hooks/useTimeCapsule';
 import { encryptFile } from '@/lib/encryption';
 import { uploadToArweave } from '@/lib/arweave';
+// import { getLitClient, buildAccessControlConditions, encryptKeyWithLit, getSessionSigs } from '@/lib/lit';
 
 export default function CreateCapsule() {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
+  const { data: walletClient } = useWalletClient();
   const router = useRouter();
   
   // Wizard state
@@ -85,16 +88,27 @@ const handleSubmit = async () => {
     // Step 1: Encrypt the file
     console.log('Encrypting file...');
     const { encryptedData, encryptionKey, originalName, originalType } = await encryptFile(file);
-    
-    // Step 2: Upload to Arweave
+
+    // Step 2 (Lit - disabled: requires Capacity Credits on datil network)
+    // When re-enabled, Lit cryptographically enforces the time-lock — the network will
+    // release the AES key after unlockTimestamp AND only to the beneficiary address
+    //
+    // console.log('Connecting to Lit Protocol...');
+    // const litClient = await getLitClient();
+    // const accessControlConditions = buildAccessControlConditions(beneficiary, unlockTimestamp);
+    // const sessionSigs = await getSessionSigs(litClient, walletClient, address);
+    // const { ciphertext, dataToEncryptHash } = await encryptKeyWithLit(encryptionKey, accessControlConditions);
+    // const litEncryptedKey = JSON.stringify({ ciphertext, dataToEncryptHash, accessControlConditions });
+
+    // Step 3: Upload to Arweave
     console.log('Uploading to Arweave...');
     const arweaveTxId = await uploadToArweave(encryptedData, {
       name: originalName,
       type: originalType,
       title: title,
     });
-    
-    // Step 3: Call the smart contract
+
+    // Step 4: Call the smart contract — store raw AES key (Lit disabled, relies on contract enforcement only)
     console.log('Creating capsule on blockchain...');
     await createCapsule(beneficiary, unlockTimestamp, arweaveTxId, encryptionKey);
 
@@ -140,30 +154,30 @@ const handleSubmit = async () => {
             </div>
           ))}
         </div>
-
+ 
         {/* Step Labels */}
         <div className="flex justify-between mb-8 text-sm">
           <span className={currentStep >= 1 ? 'text-purple-600' : 'text-gray-400'}>1. Artifact</span>
           <span className={currentStep >= 2 ? 'text-purple-600' : 'text-gray-400'}>2. Conditions</span>
           <span className={currentStep >= 3 ? 'text-purple-600' : 'text-gray-400'}>3. Seal</span>
         </div>
-
+ 
         {/* Error Display */}
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
             Error: {error.message}
           </div>
         )}
-
+ 
         {/* Step Content */}
         <div className="bg-white rounded-2xl border border-gray-00 p-8">
-
+ 
           {/* Step 1: Upload File */}
           {currentStep === 1 && (
             <div>
               <h2 className="text-black font-semibold mb-4">Upload Your Artifact</h2>
               <p className="text-green-600 mb-6">Select the file you want to preserve in your time capsule.</p>
-
+ 
               <div className="border-2 border-dashed border-gray-500 rounded-xl p-8 text-center">
                 <input
                   type="file"
@@ -182,13 +196,13 @@ const handleSubmit = async () => {
               </div>
             </div>
           )}
-
+ 
           {/* Step 2: Set Conditions */}
           {currentStep === 2 && (
             <div>
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Set Conditions</h2>
               <p className="text-green-600 mb-6">Define who can open this capsule and when.</p>
-
+ 
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-900 mb-1">Title</label>
@@ -200,7 +214,7 @@ const handleSubmit = async () => {
                     className="w-full px-4 py-2 border border-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder:text-gray-700"
                   />
                 </div>
-
+ 
                 <div>
                   <label className="block text-sm font-medium text-gray-900 mb-1">Beneficiary Wallet Address</label>
                   <input
@@ -211,7 +225,7 @@ const handleSubmit = async () => {
                     className="w-full px-4 py-2 border border-gray-500 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder:text-gray-700"
                   />
                 </div>
-
+ 
                 <div>
                   <label className="block text-sm font-medium text-gray-900 mb-1">Unlock Date</label>
                   <input
@@ -224,13 +238,13 @@ const handleSubmit = async () => {
               </div>
             </div>
           )}
-
+ 
           {/* Step 3: Confirm and Seal */}
           {currentStep === 3 && (
             <div>
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Seal Your Capsule</h2>
               <p className=" text-green-600 mb-6">Review your capsule details before sealing.</p>
-
+ 
               <div className="bg-gray-50 rounded-xl p-6 space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-900">File:</span>
@@ -253,7 +267,7 @@ const handleSubmit = async () => {
                   </span>
                 </div>
               </div>
-
+ 
               {/* Transaction Status */}
               {(isPending || isConfirming) && (
                 <div className="mt-6 text-center">
@@ -266,7 +280,7 @@ const handleSubmit = async () => {
             </div>
           )}
         </div>
-
+ 
         {/* Navigation Buttons */}
         <div className="flex justify-between mt-6">
           <button
@@ -280,7 +294,7 @@ const handleSubmit = async () => {
           >
             ← Previous
           </button>
-
+ 
           {currentStep < 3 ? (
             <button
               onClick={nextStep}
