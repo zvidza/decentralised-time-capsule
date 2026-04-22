@@ -45,22 +45,22 @@ export default function Home() {
         </div>
 
         {/* Features */}
-        <div className="grid grid-cols-1 gap-4 mt-12">
-          <div className="bg-white p-4 rounded-xl shadow-sm">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg mx-auto mb-2">
-              <span className="text-4xl">🌐🔐</span>
+        <div className="grid grid-rows-3 gap-4 mt-12">
+          <div className="bg-white p-4 rounded-xl shadow-sm text-center">
+            <div className="w-10 h-10 bg-purple-100 rounded-lg mx-auto mb-2 flex items-center justify-center">
+              <span className="text-xl">🔐</span>
             </div>
             <p className="text-sm text-gray-600">Client-Side Encryption</p>
           </div>
-          <div className="bg-white p-4 rounded-xl shadow-sm">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg mx-auto mb-2">
-              <span className="text-4xl">💾♾️</span>
+          <div className="bg-white p-4 rounded-xl shadow-sm text-center">
+            <div className="w-10 h-10 bg-purple-100 rounded-lg mx-auto mb-2 flex items-center justify-center">
+              <span className="text-xl">💾</span>
             </div>
             <p className="text-sm text-gray-600">Arweave Permanent Storage</p>
           </div>
-          <div className="bg-white p-4 rounded-xl shadow-sm">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg mx-auto mb-2">
-              <span className="text-4xl">🧑‍💻🔗</span>
+          <div className="bg-white p-4 rounded-xl shadow-sm text-center">
+            <div className="w-10 h-10 bg-purple-100 rounded-lg mx-auto mb-2 flex items-center justify-center">
+              <span className="text-xl">🌐</span>
             </div>
             <p className="text-sm text-gray-600">ENS Compatible</p>
           </div>
