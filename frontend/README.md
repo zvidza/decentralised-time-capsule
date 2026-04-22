@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Decentralised Time Capsule
+
+A Web3 decentralised application (dApp) that allows users to create, encrypt, and store digital time capsules on the blockchain. Capsules are locked until a specified date, ensuring secure and immutable preservation of digital memories
+
+## Live Demo
+
+🔗 web3-decentralised-time-capsule-alpha.vercel.app
+
+## Features
+
+- **Wallet Connection** - Connect via MetaMask or WalletConnect
+- **Create Capsules** - Upload files with a beneficiary and unlock date
+- **Client-Side Encryption** - Files encrypted using AES-256 before storage
+- **Time-Lock Mechanism** - Smart contract enforces unlock dates
+- **Decentralised Storage** - Files stored on Arweave (mock implementation for prototype)
+- **Cancel Capsules** - Creators can cancel before unlock time
+- **Multi-File Support** - Images, PDFs, text, video, and audio
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | Next.js, React, Tailwind CSS |
+| Wallet | RainbowKit, wagmi, viem |
+| Blockchain | Arbitrum Sepolia (Ethereum L2) |
+| Smart Contract | Solidity, Hardhat, OpenZeppelin |
+| Storage | Arweave (mock: localStorage) |
+| Encryption | Web Crypto API (AES-GCM 256-bit) |
+
+## Smart Contract
+
+- **Network:** Arbitrum Sepolia
+- **Address:** `0xe04fefe1A8005a18387855a0f91a4Af41b54a277`
+- **View on Explorer:** [Arbiscan](https://sepolia.arbiscan.io/address/0xe04fefe1A8005a18387855a0f91a4Af41b54a277)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js (v18+)
+- MetaMask wallet
+- Sepolia ETH for gas ([Arbitrum Faucet](https://faucet.arbitrum.io/))
+
+### Installation
+
+1. Clone the repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+   git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
+   cd YOUR_REPO
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies
+```bash
+   cd frontend
+   npm install
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+3. Run the development server
+```bash
+   npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Open [http://localhost:3000](http://localhost:3000)
 
-## Learn More
+### Smart Contract Deployment (Optional)
 
-To learn more about Next.js, take a look at the following resources:
+1. Install Hardhat dependencies
+```bash
+   cd ..
+   npm install
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. Create `.env` file with:
+ALCHEMY_API_KEY=your_alchemy_key
+PRIVATE_KEY=your_wallet_private_key
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. Deploy to Arbitrum Sepolia
+```bash
+   npx hardhat run scripts/deploy.mjs --network arbitrumSepolia
+```
 
-## Deploy on Vercel
+## Project Structure
+├── contracts/
+│   └── TimeCapsule.sol        # Smart contract
+├── scripts/
+│   └── deploy.mjs             # Deployment script
+├── frontend/
+│   └── src/
+│       ├── app/               # Next.js pages
+│       ├── components/        # React components
+│       ├── hooks/             # Custom hooks
+│       └── lib/               # Utilities
+└── README.md
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Limitations
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Mock Arweave:** Prototype uses localStorage instead of real Arweave. Cross-browser retrieval not supported
+
+- **Mock LIT Protocol:** Time lock decryption uses a simulated LIT Protocol integration. Actual threshold cryptography and distributed key management are not performed; unlock access is enforced solely by the smart contract on-chain
+
+- **Testnet Only:** Deployed on Arbitrum Sepolia, not mainnet
+
+## Author
+
+Tadiwanashe Mandizvidza
+
+## License
+
+This project is part of an academic dissertation
