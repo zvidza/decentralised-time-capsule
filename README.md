@@ -4,7 +4,7 @@ A Web3 decentralised application (dApp) that allows users to create, encrypt, an
 
 ## Live Demo
 
-🔗 web3-decentralised-time-capsule-alpha.vercel.app
+https://web3-decentralised-time-capsule-alpha.vercel.app
 
 ## Features
 
