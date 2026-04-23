@@ -46,7 +46,7 @@ https://web3-decentralised-time-capsule-alpha.vercel.app
 1. Clone the repository
 ```bash
    git clone https://github.com/zvidza/decentralised-time-capsule.git
-   cd YOUR_REPO
+   cd decentralised-time-capsule
 ```
 
 2. Install dependencies
