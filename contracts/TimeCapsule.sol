@@ -14,7 +14,7 @@ import "@openzeppelin/contracts/utils/Pausable.sol";
 */
 contract TimeCapsule is ReentrancyGuard, Ownable, Pausable {
 
-    // State variables
+    // State varaibles
 
     /// @dev Counter for capsule IDs
     uint256 private _capsuleIdCounter;
@@ -36,7 +36,7 @@ contract TimeCapsule is ReentrancyGuard, Ownable, Pausable {
     /// @dev Mapping creator address to created capsule IDs
     mapping(address => uint256[]) private _createdCapsules;
 
-    /// @dev Mapping beneficiary address to assigned capsule IDs
+    /// @dev Mapping beneficary address to assigned capsule IDs
     mapping(address => uint256[]) private _beneficiaryCapsules;
 
     //Gas optimization errors
@@ -96,7 +96,7 @@ contract TimeCapsule is ReentrancyGuard, Ownable, Pausable {
         string memory _arweaveTxId,
         string memory _encryptedKey
     ) external nonReentrant whenNotPaused returns (uint256) {
-        //VALIDATIONS
+        //VALIDATION
         require(
             _unlockTimestamp > block.timestamp,
             "Unlock time should sometime be in the future"
@@ -119,7 +119,7 @@ contract TimeCapsule is ReentrancyGuard, Ownable, Pausable {
         uint256 newCapsuleId = _capsuleIdCounter;
         _capsuleIdCounter ++;
 
-        //New capsule struct 
+        //New capsule stuct
         Capsule memory newCapsule = Capsule({
             creator: msg.sender,
             id: newCapsuleId,

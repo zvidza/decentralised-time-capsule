@@ -1,11 +1,11 @@
 // TimeCapsule Contract Configuration
-// This connects frontend to deployed smart contract
+// This connects frontent to deployed smart contract
 
 // Deployment address
 export const CONTRACT_ADDRESS = "0xe04fefe1A8005a18387855a0f91a4Af41b54a277";
 
 // Contract ABI - defines how to interact with the contract
-// matching functions in TimeCapsule.sol
+// matching funtions in TimeCapsule.sol
 export const TIMECAPSULE_ABI = [
   // Creating a new capsule  
 {

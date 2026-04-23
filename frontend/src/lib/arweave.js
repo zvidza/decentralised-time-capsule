@@ -1,13 +1,12 @@
 /**
-* Arweave Storage Helper
+* Arweave Storage Helper — Mock Implementation
 *
-* For this prototype, I use a mock implementation that:
-* 1. Stores files in IndexedDB (for demo purposes — handles large files unlike localStorage)
-* 2. Can easily be swapped for real Arweave in production
+* This is a prototype implementation that stores files in IndexedDB rather than
+* the Arweave permaweb. It is designed to be swapped out for production implementation
 *
-* In production,:
-* - going to choose to Use Irys (Bundlr) or Arweave directly
-* - Pay with AR tokens for permanent storage
+* Production upgrade path:
+* - Replace uploadToArweave / downloadFromArweave with calls to Irys ( Bundlr) or the Arweave HTTP API
+* - Transactions are paid with AR tokens and result in permanent, content-addressed storage
 */
 
 const DB_NAME = 'timeCapsuleDB';
@@ -43,7 +42,7 @@ function dbGet(db, key) {
     });
 }
 
-// Mock upload - stores in IndexedDB for demo
+// Mock upload - stores in IndexDB for demo
 // Returns a fake "transaction ID"
 export async function uploadToArweave(encryptedData, metadata) {
     const txId = 'ar_' + Date.now() + '_' + Math.random().toString(36).substring(7);
@@ -60,7 +59,7 @@ export async function uploadToArweave(encryptedData, metadata) {
     return txId;
 }
 
-// Fetch only metadata (title, name, type) without loading the full encrypted blob
+// Fetch only metadata (title, name, type) without loading full encrypted blob
 export async function getMetadataFromArweave(txId) {
     const db = await openDB();
     const item = await dbGet(db, txId);

@@ -4,15 +4,14 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useWalletClient } from 'wagmi';
 import { useCreateCapsule } from '@/hooks/useTimeCapsule';
 import { encryptFile } from '@/lib/encryption';
 import { uploadToArweave } from '@/lib/arweave';
+// Lit Protocol import — disabled: Lit Capacity Credits required on the datil network for production use
 // import { getLitClient, buildAccessControlConditions, encryptKeyWithLit, getSessionSigs } from '@/lib/lit';
 
 export default function CreateCapsule() {
-  const { isConnected, address } = useAccount();
-  const { data: walletClient } = useWalletClient();
+  const { isConnected } = useAccount();
   const router = useRouter();
   
   // Wizard state
@@ -51,7 +50,7 @@ export default function CreateCapsule() {
     }
   };
 
-// Navigation between steps
+// Nagivation between steps
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 3));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
@@ -70,7 +69,7 @@ const handleSubmit = async () => {
       alert('File too large! Please select a file under 2MB.\n\n(This limit exists because the demo uses localStorage. Production would use Arweave with no size limit.)');
       return;
     }
-    // validate beneficiary address 
+    // validate benficiary address
     if (!beneficiary || !unlockDate) {
       alert('Please fill in all fields');
       return;
@@ -85,7 +84,7 @@ const handleSubmit = async () => {
       return;
     }
 
-    // Step 1: Encrypt the file
+    // Encryt the file first
     console.log('Encrypting file...');
     const { encryptedData, encryptionKey, originalName, originalType } = await encryptFile(file);
 
@@ -100,7 +99,7 @@ const handleSubmit = async () => {
     // const { ciphertext, dataToEncryptHash } = await encryptKeyWithLit(encryptionKey, accessControlConditions);
     // const litEncryptedKey = JSON.stringify({ ciphertext, dataToEncryptHash, accessControlConditions });
 
-    // Step 3: Upload to Arweave
+    // Upload to Arweave
     console.log('Uploading to Arweave...');
     const arweaveTxId = await uploadToArweave(encryptedData, {
       name: originalName,
@@ -108,7 +107,7 @@ const handleSubmit = async () => {
       title: title,
     });
 
-    // Step 4: Call the smart contract — store raw AES key (Lit disabled, relies on contract enforcement only)
+    // Write to contract — raw AES key stored (Lit disabled, relies on contract enforcement only)
     console.log('Creating capsule on blockchain...');
     await createCapsule(beneficiary, unlockTimestamp, arweaveTxId, encryptionKey);
 

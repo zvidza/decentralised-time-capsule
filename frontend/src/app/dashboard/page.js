@@ -158,7 +158,7 @@ export default function Dashboard() {
         }
     }, [isConnected, router]);
 
-    // Don't render until we confirm wallet is connected
+    // Dont render until we confirm wallet is connected
     if (!isConnected) {
         return null;
     }

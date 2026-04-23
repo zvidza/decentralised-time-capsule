@@ -1,9 +1,6 @@
-/**
-* Encryption utilities using Web Crypto API - 
-* Using AES-GCM encryption which is: Fast and secure, Built into all modern browsers, No external libraries
-*/
+// AES-GCM encryption via the Web Crypto API, no external deps needed
 
-// Generate a random encryption key
+// Generate random encryption key
 export async function generateKey() {
     const key = await window.crypto.subtle.generateKey(
         {
@@ -23,7 +20,7 @@ export async function exportKey(key) {
     return btoa(String.fromCharCode(...new Uint8Array(exported)));
 }
 
-// Importing key from a string
+// Importing key from string
 export async function importKey(keyString) {
     // Converting from base64 string
     const keyData = Uint8Array.from(atob(keyString), c => c.charCodeAt(0));
@@ -54,7 +51,7 @@ export async function encryptFile(file) {
         fileBuffer
     );
 
-    // Combine IV + encrypted data (IV used for decryption later))
+    // Combine IV + encypted data (IV used for decryption later))
     const combined = new Uint8Array(iv.length + encryptedBuffer.byteLength);
     combined.set(iv, 0);
     combined.set(new Uint8Array(encryptedBuffer), iv.length);
@@ -75,7 +72,7 @@ export async function decryptFile(encryptedData, keyString, fileName, fileType) 
     // Import the key
     const key = await importKey(keyString);
 
-    // Extract IV (first 12 bytes) and encrypted content
+    // Extract the IV (first 12 bytes) and encrpyted content
     const iv = encryptedData.slice(0, 12);
     const content = encryptedData.slice(12);
 

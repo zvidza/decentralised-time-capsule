@@ -8,11 +8,10 @@ export function useCreatedCapsules(address) {
         abi: TIMECAPSULE_ABI,
         functionName: 'getCreatedCapsules',
         args: [address],
-        enabled: !!address, // Only run if address exists
+        enabled: !!address, // Only run if adress exists
         });
 }
 
-// Hook to get capsules where address is beneficiary
 export function useBeneficiaryCapsules(address) {
     return useReadContract({
         address: CONTRACT_ADDRESS,
@@ -34,7 +33,6 @@ export function useCapsule(id) {
     });
 }
 
-// Hook to get capsule status
 export function useCapsuleStatus(id) {
     return useReadContract({
         address: CONTRACT_ADDRESS,

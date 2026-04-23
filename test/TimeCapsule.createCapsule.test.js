@@ -1,23 +1,17 @@
 import { expect } from "chai";
 import { network } from "hardhat";
 
-/**
- * @title TimeCapsule createCapsule Tests
- * @notice Tests that verify capsule creation works correctly
- */
 describe("TimeCapsule - createCapsule", function () {
     let ethers, timeCapsule, owner, creator, beneficiary;
 
     const sampleArweaveTxId = "myNameIsTadiwaAndIAmCreatingATimeCapsule";
     const sampleEncryptedKey = "encryptedKey2003";
 
-    // Helper function to get latest block timestamp as BigInt
     async function getLatestTimestamp() {
         const block = await ethers.provider.getBlock("latest");
         return BigInt(block.timestamp);
     }
 
-    // Helper function to check if transaction emits an event
     async function expectEvent(tx, eventName) {
         const receipt = await tx.wait();
         const event = receipt.logs.find(
@@ -29,13 +23,11 @@ describe("TimeCapsule - createCapsule", function () {
         return event;
     }
 
-    // Helper function to expect a revert with message
     async function expectRevert(promise, expectedMessage) {
         try {
             await promise;
             expect.fail("Expected transaction to revert");
         } catch (error) {
-            // Check various places where the revert reason might be
             const errorString =
                 error.message + (error.reason || "") + (error.data || "");
             expect(
@@ -45,7 +37,6 @@ describe("TimeCapsule - createCapsule", function () {
         }
     }
 
-    // Helper function to expect a revert with custom error
     async function expectRevertCustomError(promise, errorName) {
         try {
             await promise;

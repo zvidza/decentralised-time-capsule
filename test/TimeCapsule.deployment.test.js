@@ -1,10 +1,6 @@
 import { expect } from "chai";
 import { network } from "hardhat";
 
-/**
- * @title TimeCapsule Deployment Tests
- * @notice Tests that verify correct deployment of TimeCapsule contract
- */
 describe("TimeCapsule - Deployment", function () {
     let ethers, timeCapsule, owner;
 

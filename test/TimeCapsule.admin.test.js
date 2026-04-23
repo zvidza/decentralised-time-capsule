@@ -1,11 +1,6 @@
 import { expect } from "chai";
 import { network } from "hardhat";
 
-/**
- * @title TimeCapsule - Admin Functions Tests
- * @notice tests that verufy owner only admin functions work
- * @dev tests ownable and pausable funtionality 
- */
 describe("TimeCapsule - Admin Functions", function () {
     let ethers, timeCapsule, owner, creator, beneficiary, randomUser;
 

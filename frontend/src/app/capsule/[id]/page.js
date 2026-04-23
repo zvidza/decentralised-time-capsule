@@ -12,7 +12,7 @@ import { markCapsuleAsOpened } from '@/lib/openedCapsules';
 import Countdown from '@/components/Countdown';
 
 export default function CapsuleViewer() {
-    //hooks and state
+    //hook and state
     const { address, isConnected } = useAccount();
     const { data: walletClient } = useWalletClient();
     const router = useRouter();
@@ -43,7 +43,7 @@ export default function CapsuleViewer() {
         }
     }, [isConnected, router]);
 
-    // Pre-warm the Lit client connection on mount so it's ready when the user opens the capsule
+    // Pre-warm the Lit client connection on mount so its ready when the user opens the capsule
     useEffect(() => {
         getLitClient().catch(() => {});
     }, []);
@@ -119,13 +119,13 @@ export default function CapsuleViewer() {
         setError(null);
 
         try {
-            // Step 1: Resolve the AES key —either via Lit or raw base64
+            // Resolve the AES key — either via Lit or raw base64
             let aesKeyString;
             let litData = null;
             try {
                 litData = JSON.parse(capsule.encryptedKey);
             } catch {
-                // Not JSON — must be a legacy raw base64 key
+                // Not JSON — must be legacy raw base64 key
             }
 
             if (litData?.ciphertext) {
@@ -144,11 +144,11 @@ export default function CapsuleViewer() {
                 aesKeyString = capsule.encryptedKey;
             }
 
-            // Step 2: Download from Arweave
+            // Download from Arweave
             console.log('Downloading from Arweave...');
             const { encryptedData, metadata } = await downloadFromArweave(capsule.arweaveTxId);
 
-            // Step 3: Decrypt the file with the resolved AES key
+            // Decrypt with the resolved AES key
             console.log('Decrypting file...');
             const decryptedFile = await decryptFile(
                 encryptedData,
@@ -157,7 +157,7 @@ export default function CapsuleViewer() {
                 metadata.type
             );
 
-            // Step 3: Create URL for viewing
+            // Create blob URL for veiwing
             const url = URL.createObjectURL(decryptedFile);
             setDecryptedContent(url);
             setContentType(decryptedFile.type);
@@ -262,7 +262,7 @@ export default function CapsuleViewer() {
             );
         }
 
-        // Other files - show download option
+        // Other files - show downlaod option
         return (
             <div className="mt-6 text-center text-gray-500">
                 <p className="text-4xl mb-4">📄</p>

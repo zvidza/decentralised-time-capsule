@@ -25,7 +25,7 @@ export function markCapsuleAsOpened(address, capsuleId) {
 
         const userOpened = allOpened[address.toLowerCase()] || [];
 
-        // Add if not already in list
+        // Add if not alredy in list
         if (!userOpened.includes(capsuleId.toString())) {
             userOpened.push(capsuleId.toString());
             allOpened[address.toLowerCase()] = userOpened;

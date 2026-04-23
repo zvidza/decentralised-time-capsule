@@ -1,23 +1,17 @@
 import { expect } from "chai";
 import { network } from "hardhat";
 
-/**
- * @title TimeCapsule cancelCapsule Tests
- * @notice Tests that verify capsule cancellation works correctly
- */
 describe("TimeCapsule - cancelCapsule", function () {
     let ethers, timeCapsule, owner, creator, beneficiary, otherUser;
 
     const sampleArweaveTxId = "myNameIsTadiwaAndIAmCreatingATimeCapsule";
     const sampleEncryptedKey = "encryptedKey2003";
 
-    // Helper function to get latest block timestamp as BigInt
     async function getLatestTimestamp() {
         const block = await ethers.provider.getBlock("latest");
         return BigInt(block.timestamp);
     }
 
-    // Helper function to check if transaction emits an event
     async function expectEvent(tx, eventName) {
         const receipt = await tx.wait();
         const event = receipt.logs.find(
@@ -28,7 +22,6 @@ describe("TimeCapsule - cancelCapsule", function () {
         return event;
     }
 
-    // Helper function to expect a revert with message
     async function expectRevert(promise, expectedMessage) {
         try {
             await promise;
@@ -43,7 +36,6 @@ describe("TimeCapsule - cancelCapsule", function () {
         }
     }
 
-    // Helper function to expect a revert with custom error
     async function expectRevertCustomError(promise, errorName) {
         try {
             await promise;
@@ -53,7 +45,6 @@ describe("TimeCapsule - cancelCapsule", function () {
         }
     }
 
-    // Helper function to increase blockchain time
     async function increaseTimeTo(timestamp) {
         await ethers.provider.send("evm_setNextBlockTimestamp", [
             Number(timestamp),

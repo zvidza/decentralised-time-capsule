@@ -1,24 +1,17 @@
 import { expect } from "chai";
 import { network } from "hardhat";
 
-/**
- * @title TimeCapsule View Functions Tests
- * @notice Tests that verify read-only functions work correctly
- * @dev View functions cost no gas when called externally
- */
 describe("TimeCapsule - View Functions", function () {
     let ethers, timeCapsule, owner, creator, beneficiary, otherUser;
 
     const sampleArweaveTxId = "myNameIsTadiwaAndIAmCreatingATimeCapsule";
     const sampleEncryptedKey = "encryptedKey2003";
 
-    // Helper function to get latest block timestamp as BigInt
     async function getLatestTimestamp() {
         const block = await ethers.provider.getBlock("latest");
         return BigInt(block.timestamp);
     }
 
-    // Helper function to expect a revert with custom error
     async function expectRevertCustomError(promise, errorName) {
         try {
             await promise;
@@ -28,7 +21,6 @@ describe("TimeCapsule - View Functions", function () {
         }
     }
 
-    // Helper function to increase blockchain time
     async function increaseTimeTo(timestamp) {
         await ethers.provider.send("evm_setNextBlockTimestamp", [Number(timestamp)]);
         await ethers.provider.send("evm_mine", []);
